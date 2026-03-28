@@ -119,6 +119,41 @@ The `web/` directory contains an interactive tool for drawing shapes and seeing 
 3. Navigate to `http://localhost:8000/web/` in your browser.
 4. Draw a shape and see real-time predictions powered by `model.onnx`.
 
+## 🌐 Deploy to GitHub Pages
+
+This repository is now set up to deploy the contents of `web/` to GitHub Pages using GitHub Actions.
+
+### 1. Push the repository to GitHub
+
+```bash
+git add .
+git commit -m "Add GitHub Pages deployment"
+git push origin main
+```
+
+### 2. Enable GitHub Pages in the repository settings
+
+In your GitHub repository:
+
+1. Go to **Settings** → **Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Wait for the **Deploy Web Demo to GitHub Pages** workflow to finish.
+
+Your site will be available at:
+
+```text
+https://<your-github-username>.github.io/<your-repository-name>/
+```
+
+For example, if your username is `aakash123` and the repository name is `shape-recognition-cnn`, the URL will be:
+
+```text
+https://aakash123.github.io/shape-recognition-cnn/
+```
+
+> [!NOTE]
+> The web app is fully static, so GitHub Pages works well for browser inference with ONNX. Downloaded samples are still saved client-side in the browser and must be added back to the repository manually if you want to retrain the model.
+
 ## 🛠 Supported Shapes
 
 `ellipse`, `line`, `triangle`, `rectangle`, `pentagon`, `hexagon`, `star`, `zigzag`, `arc`, `heart`, `diamond`, `arrow`, `double_arrow`, `cloud`, `message`, `parallelogram`.
