@@ -1,5 +1,7 @@
 # Shape Recognition CNN
 
+![Shape Recognition CNN Demo](img/mainpage.png)
+
 A production-ready Convolutional Neural Network (CNN) for recognizing hand-drawn shapes. This project combines synthetic data generation with real-world browser-collected samples to achieve robust recognition across 16 different shape classes.
 
 ## ✨ Features
@@ -14,12 +16,15 @@ A production-ready Convolutional Neural Network (CNN) for recognizing hand-drawn
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. Prepare the Dataset
+
 Merge raw synthetic and collected samples into a processed dataset:
+
 ```bash
 # Default (generates/merges data as needed)
 python scripts/data_prep.py
@@ -27,11 +32,14 @@ python scripts/data_prep.py
 # Force new synthetic generation with custom sample count
 python scripts/data_prep.py --delete True --n 500
 ```
+
 > [!NOTE]
 > The first time you run this, all individual `browser-*.json` files in `data/raw/collected/` will be consolidated into a single `merged_browser_samples.json` for faster processing in future runs.
 
 ### 3. Training
+
 Train the TinyCNN model with configurable hyperparameters:
+
 ```bash
 # Default (100 epochs, lr=0.001, batch=64)
 python scripts/train.py
@@ -39,21 +47,27 @@ python scripts/train.py
 # Custom hyperparameters
 python scripts/train.py --epochs 150 --lr 0.0005 --batch_size 128 --weight 15.0
 ```
+
 > [!TIP]
 > Each training run creates a new folder in `logs/run_<timestamp>/` containing:
+>
 > - `train.log`: Full console output.
 > - `metrics.csv`: Per-epoch loss and accuracy.
 > - `samples/`: Visualizations of model predictions.
 > - `checkpoints/`: Model weights (`model_best.pth`, etc.).
 
 ### 4. Inference
+
 Test the model on sample points:
+
 ```bash
 python scripts/infer.py
 ```
 
 ### 5. Export to ONNX
+
 Export the trained model for web use:
+
 ```bash
 python scripts/export.py
 ```
@@ -82,18 +96,18 @@ python scripts/export.py
 
 All executable scripts are located in the `scripts/` directory. Use them to manage the full pipeline:
 
-| Script | Description |
-| :--- | :--- |
-| `data_prep.py` | **Start here.** Merges synthetic and browser data, consolidates samples, and generates `dataset.json`. |
-| `train.py` | Trains the CNN model. Supports flags for `--lr`, `--epochs`, `--batch_size`, etc. Logs output to `logs/`. |
-| `infer.py` | Quick CLI inference. Loads `model_best.pth` to predict a sample shape. |
-| `export.py` | Converts the PyTorch `.pth` checkpoint to `model.onnx` for the web demo. |
-| `visualize.py` | Visualizes dataset samples and their augmented versions for debugging. |
-| `generate_synthetic.py` | Core logic for synthetic data generation (also called by `data_prep.py`). |
+| Script                  | Description                                                                                               |
+| :---------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `data_prep.py`          | **Start here.** Merges synthetic and browser data, consolidates samples, and generates `dataset.json`.    |
+| `train.py`              | Trains the CNN model. Supports flags for `--lr`, `--epochs`, `--batch_size`, etc. Logs output to `logs/`. |
+| `infer.py`              | Quick CLI inference. Loads `model_best.pth` to predict a sample shape.                                    |
+| `export.py`             | Converts the PyTorch `.pth` checkpoint to `model.onnx` for the web demo.                                  |
+| `visualize.py`          | Visualizes dataset samples and their augmented versions for debugging.                                    |
+| `generate_synthetic.py` | Core logic for synthetic data generation (also called by `data_prep.py`).                                 |
 
 ## 🎨 Web Demo
 
-The `web/` directory contains an interactive tool for drawing shapes and seeing real-time predictions. 
+The `web/` directory contains an interactive tool for drawing shapes and seeing real-time predictions.
 
 **Note**: Browsers typically restrict loading local files (CORS) for models like ONNX. You should run a local HTTP server to use the demo:
 
@@ -110,4 +124,5 @@ The `web/` directory contains an interactive tool for drawing shapes and seeing 
 `ellipse`, `line`, `triangle`, `rectangle`, `pentagon`, `hexagon`, `star`, `zigzag`, `arc`, `heart`, `diamond`, `arrow`, `double_arrow`, `cloud`, `message`, `parallelogram`.
 
 ---
-*Created for robust shape recognition in digital whiteboarding applications.*
+
+_Created for robust shape recognition in digital whiteboarding applications._

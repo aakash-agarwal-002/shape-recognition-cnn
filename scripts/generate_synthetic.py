@@ -69,6 +69,24 @@ def wobble(pts, scale=0.02):
     pts[:,1] += np.roll(noise, 5)
     return pts
 
+def soften_line(pts):
+    t = np.linspace(0, 1, len(pts), dtype=np.float32)
+
+    # Add a small, smooth perpendicular drift so the line reads as hand-drawn
+    # while staying globally straight and distinct from arcs/zigzags.
+    drift = np.random.normal(0, 0.02, len(pts)).astype(np.float32)
+    for _ in range(12):
+        drift = (np.roll(drift, 1) + drift + np.roll(drift, -1)) / 3
+    drift -= np.linspace(drift[0], drift[-1], len(drift), dtype=np.float32)
+    envelope = np.sin(np.pi * t) ** 0.9
+    pts[:, 1] += drift * envelope
+
+    # Add one mild directional bend, but keep it far below arc-like curvature.
+    bend_amp = np.random.uniform(-0.03, 0.03)
+    pts[:, 1] += bend_amp * (t - 0.5) * envelope
+
+    return pts
+
 # ======================
 # WIDTH (single stroke)
 # ======================
@@ -172,8 +190,9 @@ def get_generation_profile(name):
         profile.update(
             {
                 "wobble": 0.0015,
-                "rotate": False,
-                "scale_range": (0.9, 1.1),
+                "rotate": True,
+                "rotation_deg": 180,
+                "scale_range": (0.95, 1.08),
                 "translate_range": (-0.2, 0.2),
             }
         )
@@ -224,8 +243,21 @@ def arc():
     return to_f(np.stack([np.cos(t), np.sin(t)], axis=1))
 
 def line():
-    t = np.linspace(0,1,100)
-    return to_f(np.stack([t, np.zeros_like(t)], axis=1))
+    x = np.linspace(0, 1, 9, dtype=np.float32)
+    y = np.zeros_like(x)
+
+    # Use a mostly one-directional drift so the line has visible human wobble
+    # after 64x64 rasterization, but still does not alternate like a zigzag.
+    dominant_sign = np.random.choice([-1.0, 1.0])
+    steps = dominant_sign * np.random.uniform(0.004, 0.016, len(x) - 1).astype(np.float32)
+    steps += np.random.normal(0, 0.005, len(x) - 1).astype(np.float32)
+    offsets = np.concatenate([[0.0], np.cumsum(steps)]).astype(np.float32)
+    offsets -= np.linspace(offsets[0], offsets[-1], len(offsets), dtype=np.float32)
+    offsets *= np.random.uniform(0.9, 1.25)
+    offsets = np.clip(offsets, -0.06, 0.06)
+    y = offsets
+
+    return to_f(np.stack([x, y], axis=1))
 
 def polygon(n):
     ang = np.linspace(0,2*np.pi,n,endpoint=False)
@@ -369,6 +401,8 @@ def generate_synthetic_data(num_samples=200, output_path=DATA_FILE):
             else:
                 pts = resample(pts, 80)
 
+            if name == "line":
+                pts = soften_line(pts)
             pts = wobble(pts, profile["wobble"])
             pts = opening(pts, name)
             pts = transform(

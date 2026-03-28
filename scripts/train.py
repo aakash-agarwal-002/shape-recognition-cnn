@@ -142,6 +142,11 @@ def main():
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, sampler=train_sampler)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=True)
 
+    test_source_counts = {"synthetic": 0, "browser": 0}
+    for idx in test_indices:
+        source = raw_data[idx].get("source", "synthetic")
+        test_source_counts[source] = test_source_counts.get(source, 0) + 1
+
     if args.export_images:
         print(f"Exporting dataset images to {DATASET_IMAGE_DIR}...")
         export_dataset_images(raw_data, train_indices, test_indices)
@@ -158,6 +163,8 @@ def main():
     print("Train samples:", len(train_ds))
     print("Test samples:", len(test_ds))
     print("Browser samples in train split:", browser_train_count)
+    print("Synthetic samples in test split:", test_source_counts.get("synthetic", 0))
+    print("Browser samples in test split:", test_source_counts.get("browser", 0))
 
     # ---------- model ----------
     model = TinyCNN(n_classes=len(LABEL_NAMES)).to(device)
@@ -235,7 +242,7 @@ def main():
     metrics_file = LOG_DIR / "metrics.csv"
     with open(metrics_file, mode="w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["epoch", "loss", "train_acc", "test_acc"])
+        writer.writerow(["epoch", "loss", "train_acc", "test_acc", "test_synthetic_acc", "test_browser_acc"])
 
     # ---------- training ----------
     best_acc = 0
@@ -254,14 +261,23 @@ def main():
         avg_loss = total_loss / len(train_loader)
         train_acc, _, _ = evaluate(train_loader)
         test_acc, confusion, test_source_acc = evaluate(test_loader)
+        test_synthetic_acc = test_source_acc.get("synthetic", "")
+        test_browser_acc = test_source_acc.get("browser", "")
+        synthetic_display = f"{test_synthetic_acc:.4f}" if test_synthetic_acc != "" else "n/a"
+        browser_display = f"{test_browser_acc:.4f}" if test_browser_acc != "" else "n/a"
         
         save_sample_predictions(epoch)
 
         with open(metrics_file, mode="a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([epoch + 1, avg_loss, train_acc, test_acc])
+            writer.writerow([epoch + 1, avg_loss, train_acc, test_acc, test_synthetic_acc, test_browser_acc])
 
         print(f"Epoch {epoch+1}/{args.epochs} | Loss: {avg_loss:.4f} | Train: {train_acc:.4f} | Test: {test_acc:.4f}")
+        print(
+            "  Test by source | "
+            f"Synthetic: {synthetic_display} | "
+            f"Browser: {browser_display}"
+        )
 
         if test_acc > best_acc:
             best_acc = test_acc

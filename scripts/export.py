@@ -23,6 +23,9 @@ def export_to_onnx(weights_path=BASE_DIR / "checkpoints" / "model_final.pth", on
 
     # Create dummy input
     dummy_input = torch.randn(1, 1, 64, 64)
+    external_data_path = Path(f"{onnx_path}.data")
+    if external_data_path.exists():
+        external_data_path.unlink()
 
     # Export
     torch.onnx.export(
@@ -30,11 +33,13 @@ def export_to_onnx(weights_path=BASE_DIR / "checkpoints" / "model_final.pth", on
         dummy_input,
         onnx_path,
         export_params=True,
-        opset_version=12,
+        opset_version=18,
         do_constant_folding=True,
         input_names=["input"],
         output_names=["output"],
-        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+        dynamo=True,
+        external_data=False,
+        dynamic_shapes=({0: torch.export.Dim("batch_size")},),
     )
     print(f"Model exported to {onnx_path}")
 
