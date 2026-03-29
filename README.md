@@ -9,6 +9,7 @@ A production-ready Convolutional Neural Network (CNN) for recognizing hand-drawn
 - **Robust Recognition**: Supports 16 shapes including Ellipse, Triangle, Star, Heart, Arrow, and more.
 - **Ultra-Lightweight**: Compact model size of only **~570KB** (ONNX), perfect for web and mobile.
 - **Hybrid Dataset**: Combines high-quality synthetic data with real hand-drawn samples.
+![Shape Recognition CNN Demo](logs/run_20260328_131449/samples/epoch_1.png)
 - **Production Structure**: Modular architecture with separate data, model, and script layers.
 - **Real-time Web Demo**: Includes a browser-based drawing tool with real-time inference using ONNX.
 - **Data Augmentation**: Advanced point-based augmentation (rotation, jitter, shear) for high generalization.
